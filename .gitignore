@@ -37,3 +37,10 @@ terraform.rc
 
 *.DS_Store*
 >>>>>>> ceb17d8 (initial commit)
+
+
+## creds
+*db-creds*
+
+# static files
+*static_files*

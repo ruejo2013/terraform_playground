@@ -22,18 +22,30 @@ resource "aws_db_instance" "mysql_db" {
     db_name                 = var.db_name
 
     # how should we set the username and password
-    username                = var.db_username
-    password                = var.db_password
+    username                = local.db_creds.username
+    password                = local.db_creds.password
 }
 
 
 terraform {
   backend "s3" {
-    bucket  = var.bucket_name
-    key     = "${var.env}/data-stores/${var.db_engine}/terraform.tfstate"
+    bucket  = "mena-terraform-up-and-running-bucket"
+    key     = "dev/data-stores/mysql/terraform.tfstate"
     region  = "us-east-1"
 
-    dynamodb_table = var.dynamodb_lock
+    dynamodb_table = "terraform_dynamo_tf_stfile_lock"
     encrypt        = true
   }
+}
+
+data "aws_kms_secrets" "creds" {
+  secret {
+    name    = "db"
+    payload = file("<path to .yml.encrypted file>")
+  }
+}
+
+
+locals {
+  db_creds   = yamldecode(data.aws_kms_secrets.creds.plaintext["db"])
 }
